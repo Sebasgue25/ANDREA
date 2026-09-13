@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#30201d" />
+    <meta name="description" content="Gestión de pedidos, inventario y proformas para Andrea." />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Andrea — Pedidos</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="brand" aria-label="Andrea">
+          <span class="brand-mark">A</span>
+          <span>Andrea</span>
+        </div>
+        <nav class="nav-list">
+          <button class="nav-item active" data-view="inicio" type="button"><span>⌂</span> Inicio</button>
+          <button class="nav-item" data-view="pedido" type="button"><span>＋</span> Nuevo pedido</button>
+          <button class="nav-item" data-view="pedidos" type="button"><span>▤</span> Pedidos</button>
+          <button class="nav-item" data-view="inventario" type="button"><span>▧</span> Inventario</button>
+          <button class="nav-item" data-view="proformas" type="button"><span>▱</span> Proformas</button>
+        </nav>
+        <div class="sidebar-footer">
+          <span class="status-dot"></span>
+          <span id="storage-mode">Datos guardados en este dispositivo</span>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir menú">☰</button>
+          <div>
+            <p class="eyebrow" id="page-kicker">GESTIÓN DE TALLER</p>
+            <h1 id="page-title">Buenos días</h1>
+          </div>
+          <div class="topbar-actions">
+            <span class="today" id="today"></span>
+            <span class="sync-status" id="sync-status">Modo local</span>
+            <button class="outline-button install-button" id="install-button" type="button" hidden>Instalar app</button>
+            <button class="profile" id="profile-button" type="button" title="Persona que atiende">A</button>
+          </div>
+        </header>
+
+        <section id="inicio" class="view active-view" aria-labelledby="page-title">
+          <div class="hero-card">
+            <div>
+              <p class="eyebrow">ANDREA · ROPA HECHA CON CUIDADO</p>
+              <h2>Todos los pedidos, a la mano.</h2>
+              <p>Registra ventas desde el celular, revisa el inventario y prepara proformas en unos minutos.</p>
+              <button class="primary-button" data-go="pedido" type="button">Registrar pedido <span>→</span></button>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+              <div class="thread thread-one"></div><div class="thread thread-two"></div><div class="thread thread-three"></div>
+              <div class="thread-word">Andrea</div>
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <article class="summary-card"><p>Pedidos activos</p><strong id="active-orders">0</strong><span>Por atender o elaborar</span></article>
+            <article class="summary-card"><p>Por entregar esta semana</p><strong id="week-orders">0</strong><span>Revisa sus fechas</span></article>
+            <article class="summary-card"><p>Saldos pendientes</p><strong id="pending-balance">$0,00</strong><span>De pedidos registrados</span></article>
+          </div>
+
+          <section class="content-section">
+            <div class="section-heading"><div><p class="eyebrow">SEGUIMIENTO</p><h2>Pedidos recientes</h2></div><button class="text-button" data-go="pedidos" type="button">Ver todos →</button></div>
+            <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>Pedido</th><th>Entrega</th><th>Estado</th><th>Total</th></tr></thead><tbody id="recent-orders"></tbody></table></div>
+          </section>
+        </section>
+
+        <section id="pedido" class="view" aria-label="Nuevo pedido">
+          <div class="section-heading form-heading"><div><p class="eyebrow">NUEVO REGISTRO</p><h2>Crear pedido</h2><p class="subtle">Habla o completa los datos. Revisa el resumen antes de guardar.</p></div><button class="voice-button" id="voice-button" type="button"><span>◉</span> Dictar pedido</button></div>
+          <div id="voice-result" class="voice-result" aria-live="polite" hidden></div>
+
+          <form id="order-form" novalidate>
+            <div class="form-layout">
+              <section class="form-card">
+                <h3>Cliente y entrega</h3>
+                <div class="field-grid two-columns">
+                  <label>Nombre del cliente<input id="customer-name" name="customerName" autocomplete="name" required placeholder="Ej. Ana Torres" /></label>
+                  <label>Teléfono<input id="customer-phone" name="customerPhone" inputmode="tel" placeholder="Ej. 099 123 4567" /></label>
+                  <label>Fecha de entrega<input id="delivery-date" name="deliveryDate" type="date" required /></label>
+                  <label>Tipo de pedido<select id="order-type" name="orderType"><option value="fabricacion">Fabricar bajo pedido</option><option value="inventario">Venta de inventario</option></select></label>
+                </div>
+              </section>
+
+              <section class="form-card">
+                <div class="card-heading"><h3>Prendas</h3><button class="small-button" id="add-item" type="button">+ Añadir prenda</button></div>
+                <div id="order-items" class="order-items"></div>
+                <p class="empty-items" id="empty-items">Añade al menos una prenda al pedido.</p>
+              </section>
+
+              <section class="form-card">
+                <h3>Bordado</h3>
+                <label class="check-label"><input id="has-embroidery" type="checkbox" /> Este pedido lleva bordado</label>
+                <div class="field-grid two-columns embroidery-fields" id="embroidery-fields" hidden>
+                  <label>Descripción del bordado<input id="embroidery-description" placeholder="Ej. Logo del colegio" /></label>
+                  <label>Ubicación<select id="embroidery-location"><option value="Pecho izquierdo">Pecho izquierdo</option><option value="Pecho derecho">Pecho derecho</option><option value="Espalda">Espalda</option><option value="Manga">Manga</option><option value="Otra">Otra</option></select></label>
+                  <label>Colores del hilo<input id="embroidery-colors" placeholder="Ej. Azul y blanco" /></label>
+                  <label>Costo del bordado<input id="embroidery-price" type="number" min="0" step="0.01" value="0" inputmode="decimal" /></label>
+                </div>
+              </section>
+
+              <section class="form-card">
+                <h3>Pago y observaciones</h3>
+                <div class="field-grid two-columns">
+                  <label>Anticipo recibido<input id="deposit" type="number" min="0" step="0.01" value="0" inputmode="decimal" /></label>
+                  <label>Estado inicial<select id="order-status"><option value="Nuevo">Nuevo</option><option value="Confirmado">Confirmado</option><option value="En corte">En corte</option><option value="En confección">En confección</option><option value="Terminado">Terminado</option><option value="Entregado">Entregado</option></select></label>
+                  <label class="span-two">Observaciones<textarea id="notes" rows="3" placeholder="Diseño, medidas especiales u otra indicación."></textarea></label>
+                </div>
+              </section>
+            </div>
+            <aside class="order-summary">
+              <p class="eyebrow">RESUMEN</p><h3>Pedido actual</h3>
+              <div id="summary-lines" class="summary-lines"><p class="subtle">Aún no hay prendas.</p></div>
+              <div class="total-line"><span>Subtotal</span><strong id="subtotal-value">$0,00</strong></div>
+              <div class="total-line"><span>Bordado</span><strong id="embroidery-value">$0,00</strong></div>
+              <div class="grand-total"><span>Total</span><strong id="total-value">$0,00</strong></div>
+              <button class="primary-button full-button" type="submit">Guardar pedido</button>
+            </aside>
+          </form>
+        </section>
+
+        <section id="pedidos" class="view" aria-label="Pedidos">
+          <div class="section-heading"><div><p class="eyebrow">REGISTRO</p><h2>Pedidos</h2></div><button class="primary-button compact-button" data-go="pedido" type="button">+ Nuevo pedido</button></div>
+          <div class="filter-bar"><input id="order-search" type="search" placeholder="Buscar por cliente o número…" /><select id="status-filter"><option value="">Todos los estados</option><option>Nuevo</option><option>Confirmado</option><option>En corte</option><option>En confección</option><option>Terminado</option><option>Entregado</option></select></div>
+          <div class="table-wrap order-table"><table><thead><tr><th>Número</th><th>Cliente</th><th>Prendas</th><th>Entrega</th><th>Estado</th><th>Total</th><th></th></tr></thead><tbody id="orders-list"></tbody></table></div>
+        </section>
+
+        <section id="inventario" class="view" aria-label="Inventario">
+          <div class="section-heading"><div><p class="eyebrow">PRODUCTO TERMINADO</p><h2>Inventario</h2><p class="subtle">Registra las prendas listas para venta inmediata.</p></div><button class="primary-button compact-button" id="open-stock-modal" type="button">+ Añadir existencia</button></div>
+          <div class="inventory-grid" id="inventory-list"></div>
+        </section>
+
+        <section id="proformas" class="view" aria-label="Proformas">
+          <div class="section-heading"><div><p class="eyebrow">DOCUMENTOS</p><h2>Proformas y recibos</h2><p class="subtle">Documentos informativos; no son facturas tributarias del SRI.</p></div></div>
+          <div class="proforma-note"><span>i</span> Para cada pedido guardado puedes generar una proforma en PDF desde la lista de pedidos.</div>
+          <div class="table-wrap"><table><thead><tr><th>Documento</th><th>Cliente</th><th>Fecha</th><th>Total</th><th></th></tr></thead><tbody id="proformas-list"></tbody></table></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="stock-modal" class="modal">
+      <form id="stock-form" method="dialog"><div class="modal-header"><div><p class="eyebrow">INVENTARIO</p><h2>Añadir existencia</h2></div><button class="icon-button" type="button" data-close-modal="stock-modal" aria-label="Cerrar">×</button></div>
+        <div class="field-grid two-columns"><label>Prenda<select id="stock-product"><option>Camiseta</option><option>Pantalón</option><option>Conjunto de calentador</option><option>Suéter de lana</option></select></label><label>Color<input id="stock-color" required placeholder="Ej. Negro" /></label><label>Talla<input id="stock-size" required placeholder="Ej. M, 12, XL" /></label><label>Cantidad<input id="stock-quantity" type="number" required min="1" value="1" /></label><label class="span-two">Precio unitario<input id="stock-price" type="number" min="0" step="0.01" required inputmode="decimal" /></label></div>
+        <div class="modal-actions"><button class="outline-button" type="button" data-close-modal="stock-modal">Cancelar</button><button class="primary-button" type="submit">Guardar existencia</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="proforma-modal" class="modal proforma-modal"><div class="modal-header"><div><p class="eyebrow">VISTA PREVIA</p><h2>Proforma</h2></div><button class="icon-button" type="button" data-close-modal="proforma-modal" aria-label="Cerrar">×</button></div><div id="proforma-preview" class="proforma-preview"></div><div class="modal-actions"><button class="outline-button" type="button" data-close-modal="proforma-modal">Cerrar</button><button class="primary-button" id="print-proforma" type="button">Imprimir / Guardar PDF</button></div></dialog>
+
+    <div class="auth-screen" id="auth-screen" hidden>
+      <form id="auth-form" class="auth-card">
+        <div class="brand auth-brand"><span class="brand-mark">A</span><span>Andrea</span></div>
+        <p class="eyebrow">ACCESO DEL EQUIPO</p>
+        <h2>Ingresa a los pedidos</h2>
+        <p>Usa el correo y contraseña creados para quien atiende.</p>
+        <label>Correo electrónico<input id="auth-email" type="email" autocomplete="email" required placeholder="nombre@correo.com" /></label>
+        <label>Contraseña<input id="auth-password" type="password" autocomplete="current-password" required placeholder="••••••••" /></label>
+        <p id="auth-error" class="auth-error" role="alert" hidden></p>
+        <button class="primary-button full-button" type="submit">Ingresar</button>
+        <p class="auth-help">Las cuentas se crean y administran desde Supabase.</p>
+      </form>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "Andrea — Pedidos",
+  "short_name": "Andrea",
+  "description": "Gestión de pedidos, inventario y proformas para Andrea.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f0e9",
+  "theme_color": "#30201d",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
